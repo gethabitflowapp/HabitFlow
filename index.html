@@ -1,0 +1,483 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#10111b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="HabitFlow">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon.svg">
+<title>HabitFlow</title>
+
+<style>
+:root {
+  --bg:#10111b;
+  --panel:#191b29;
+  --panel2:#222538;
+  --text:#f5f5fa;
+  --muted:#9296aa;
+  --border:#2c3045;
+  --accent:#9275ff;
+  --green:#55d6a0;
+  --red:#ff7185;
+}
+body.light {
+  --bg:#f3f4fa;
+  --panel:#ffffff;
+  --panel2:#eceefa;
+  --text:#191b29;
+  --muted:#777d91;
+  --border:#dfe2ee;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+  min-height:100vh;
+  transition:.2s;
+}
+button,input,select {font:inherit}
+button {cursor:pointer}
+.app {max-width:1100px;margin:auto;padding:25px}
+header {
+  display:flex;justify-content:space-between;
+  align-items:center;gap:15px;margin-bottom:30px;
+}
+.logo {font-size:25px;font-weight:800;letter-spacing:-1px}
+.logo span {color:var(--accent)}
+.actions {display:flex;gap:9px}
+.icon-btn {
+  border:1px solid var(--border);background:var(--panel);
+  color:var(--text);border-radius:12px;padding:11px 14px;
+}
+h1 {font-size:31px;margin:0 0 8px}
+.subtitle {color:var(--muted);margin-bottom:25px}
+.stats {
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:14px;margin-bottom:25px;
+}
+.stat,.panel,.habit {
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:18px;padding:19px;
+}
+.stat small {color:var(--muted)}
+.stat strong {display:block;font-size:27px;margin-top:9px}
+.progress-wrap {
+  height:9px;background:var(--panel2);
+  border-radius:20px;overflow:hidden;margin-top:13px;
+}
+.progress-bar {
+  height:100%;background:var(--accent);
+  width:0%;transition:.3s;
+}
+.section-head {
+  display:flex;justify-content:space-between;
+  align-items:center;gap:12px;margin:25px 0 15px;
+}
+.section-head h2 {font-size:20px;margin:0}
+.primary {
+  background:var(--accent);color:white;border:0;
+  border-radius:12px;padding:12px 17px;font-weight:bold;
+}
+.secondary {
+  background:var(--panel2);color:var(--text);
+  border:1px solid var(--border);border-radius:10px;padding:10px 13px;
+}
+.habits {display:grid;gap:11px}
+.habit {
+  display:flex;align-items:center;gap:14px;
+}
+.habit-color {
+  width:12px;height:43px;border-radius:8px;flex-shrink:0;
+}
+.habit-info {flex:1;min-width:0}
+.habit-info strong {display:block;margin-bottom:5px}
+.habit-info small {color:var(--muted)}
+.habit-actions {display:flex;align-items:center;gap:8px}
+.check {
+  width:39px;height:39px;border-radius:12px;
+  border:1px solid var(--border);background:var(--panel2);
+  color:var(--text);font-size:19px;
+}
+.check.done {background:var(--green);color:#10251c;border:0}
+.small-btn {
+  background:transparent;border:0;color:var(--muted);
+  padding:8px;font-size:17px;
+}
+.filters {display:flex;gap:8px;flex-wrap:wrap}
+.filter {
+  border:1px solid var(--border);background:var(--panel);
+  color:var(--muted);border-radius:20px;padding:8px 13px;
+}
+.filter.active {background:var(--accent);color:white;border-color:var(--accent)}
+.empty {text-align:center;padding:35px;color:var(--muted)}
+.calendar {
+  display:grid;grid-template-columns:repeat(7,1fr);gap:7px;
+}
+.day {
+  background:var(--panel2);border-radius:9px;
+  text-align:center;padding:11px 2px;font-size:13px;
+}
+.day.done {background:#275b4a;color:#b4ffdc}
+.day.today {outline:2px solid var(--accent)}
+.day-name {color:var(--muted);font-size:11px}
+.modal-bg {
+  position:fixed;inset:0;background:#0009;
+  display:none;align-items:center;justify-content:center;
+  padding:18px;z-index:10;
+}
+.modal {
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:20px;padding:23px;width:100%;max-width:430px;
+  max-height:90vh;overflow:auto;
+}
+.modal h2 {margin-top:0}
+.field {margin:15px 0}
+.field label {display:block;color:var(--muted);font-size:13px;margin-bottom:7px}
+.field input,.field select {
+  width:100%;padding:12px;border-radius:10px;
+  border:1px solid var(--border);background:var(--panel2);
+  color:var(--text);
+}
+.modal-actions {display:flex;gap:9px;margin-top:20px}
+.modal-actions button {flex:1}
+.color-options {display:flex;gap:10px;flex-wrap:wrap}
+.color-options input {width:25px;height:25px}
+footer {text-align:center;color:var(--muted);font-size:12px;padding:30px}
+@media(max-width:650px) {
+  .app {padding:17px}
+  .stats {grid-template-columns:1fr 1fr}
+  .stat:last-child {grid-column:span 2}
+  .habit {padding:13px}
+  .small-btn {padding:5px}
+  h1 {font-size:27px}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+<header>
+  <div class="logo">Habit<span>Flow</span></div>
+  <div class="actions">
+    <button class="icon-btn" id="installBtn" style="display:none" onclick="installApp()" title="App installieren">⬇</button>
+    <button class="icon-btn" onclick="toggleTheme()" title="Design wechseln">◐</button>
+  </div>
+</header>
+
+<h1>Dein Tag. Deine Gewohnheiten.</h1>
+<div class="subtitle" id="dateText"></div>
+
+<div class="stats">
+  <div class="stat">
+    <small>Heute erledigt</small>
+    <strong id="doneCount">0 / 0</strong>
+  </div>
+  <div class="stat">
+    <small>Fortschritt</small>
+    <strong id="progressText">0%</strong>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  </div>
+  <div class="stat">
+    <small>Aktive Gewohnheiten</small>
+    <strong id="habitCount">0</strong>
+  </div>
+</div>
+
+<div class="section-head">
+  <h2>Meine Gewohnheiten</h2>
+  <button class="primary" onclick="openModal()">+ Hinzufügen</button>
+</div>
+
+<div class="filters" id="filters"></div>
+<div class="habits" id="habits"></div>
+
+<div class="section-head">
+  <h2>Deine Woche</h2>
+</div>
+<div class="panel">
+  <div class="calendar" id="calendar"></div>
+</div>
+
+<div class="section-head">
+  <h2>Statistiken</h2>
+</div>
+<div class="stats">
+  <div class="stat">
+    <small>Abgehakte Aufgaben</small>
+    <strong id="totalDone">0</strong>
+  </div>
+  <div class="stat">
+    <small>Beste Tagesquote</small>
+    <strong id="bestRate">0%</strong>
+  </div>
+  <div class="stat">
+    <small>Wochenziel erreicht</small>
+    <strong id="weeklyDone">0</strong>
+  </div>
+</div>
+
+<footer>HabitFlow · Kleine Schritte, große Veränderungen.</footer>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h2 id="modalTitle">Neue Gewohnheit</h2>
+    <div class="field">
+      <label>Name</label>
+      <input id="habitName" maxlength="45" placeholder="z. B. 20 Minuten lesen">
+    </div>
+    <div class="field">
+      <label>Kategorie</label>
+      <select id="habitCategory">
+        <option>Gesundheit</option>
+        <option>Sport</option>
+        <option>Lernen</option>
+        <option>Produktivität</option>
+        <option>Sonstiges</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Wöchentliches Ziel (Tage)</label>
+      <select id="habitTarget">
+        <option value="1">1 Tag</option>
+        <option value="2">2 Tage</option>
+        <option value="3">3 Tage</option>
+        <option value="4">4 Tage</option>
+        <option value="5" selected>5 Tage</option>
+        <option value="6">6 Tage</option>
+        <option value="7">7 Tage</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Farbe</label>
+      <div class="color-options">
+        <input type="radio" name="habitColor" value="#9275ff" checked>
+        <input type="radio" name="habitColor" value="#55d6a0">
+        <input type="radio" name="habitColor" value="#ff9b71">
+        <input type="radio" name="habitColor" value="#55b9ee">
+        <input type="radio" name="habitColor" value="#f17db6">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeModal()">Abbrechen</button>
+      <button class="primary" onclick="saveHabit()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "habitflow_data_v1";
+let habits = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+let filter = "Alle";
+let editingId = null;
+
+const today = () => new Date().toISOString().slice(0,10);
+const getDate = d => new Date(d + "T12:00:00");
+const save = () => localStorage.setItem(STORAGE_KEY,JSON.stringify(habits));
+
+habits = habits.map(h => ({
+  ...h,
+  id:h.id || Date.now()+Math.random(),
+  category:h.category || "Sonstiges",
+  color:h.color || "#9275ff",
+  target:h.target || 5,
+  history:h.history || {}
+}));
+
+function dateLabel() {
+  document.getElementById("dateText").textContent =
+    new Intl.DateTimeFormat("de-DE",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(new Date());
+}
+
+function toggleTheme() {
+  document.body.classList.toggle("light");
+  localStorage.setItem("habitflow_theme",document.body.classList.contains("light")?"light":"dark");
+}
+
+if(localStorage.getItem("habitflow_theme")==="light") document.body.classList.add("light");
+
+function openModal(id=null) {
+  editingId=id;
+  const h=habits.find(x=>x.id===id);
+  document.getElementById("modalTitle").textContent=h?"Gewohnheit bearbeiten":"Neue Gewohnheit";
+  document.getElementById("habitName").value=h?h.name:"";
+  document.getElementById("habitCategory").value=h?h.category:"Gesundheit";
+  document.getElementById("habitTarget").value=h?h.target:5;
+  document.querySelectorAll('input[name="habitColor"]').forEach(r=>r.checked=(r.value===(h?h.color:"#9275ff")));
+  document.getElementById("modalBg").style.display="flex";
+  document.getElementById("habitName").focus();
+}
+
+function closeModal() {
+  document.getElementById("modalBg").style.display="none";
+}
+
+function saveHabit() {
+  const name=document.getElementById("habitName").value.trim();
+  if(!name) {alert("Bitte gib einen Namen ein.");return;}
+  const color=document.querySelector('input[name="habitColor"]:checked').value;
+  const data={
+    name,
+    category:document.getElementById("habitCategory").value,
+    target:Number(document.getElementById("habitTarget").value),
+    color
+  };
+  if(editingId) {
+    const h=habits.find(x=>x.id===editingId);
+    Object.assign(h,data);
+  } else {
+    habits.push({id:Date.now()+Math.random(),...data,history:{}});
+  }
+  save();closeModal();render();
+}
+
+function toggleHabit(id) {
+  const h=habits.find(x=>x.id===id);
+  if(!h) return;
+  h.history[today()]=!h.history[today()];
+  save();render();
+}
+
+function deleteHabit(id) {
+  if(!confirm("Diese Gewohnheit wirklich löschen?")) return;
+  habits=habits.filter(h=>h.id!==id);
+  save();render();
+}
+
+function setFilter(value) {
+  filter=value;render();
+}
+
+function renderFilters() {
+  const categories=["Alle",...new Set(habits.map(h=>h.category))];
+  document.getElementById("filters").innerHTML=categories.map(c=>
+    `<button class="filter ${filter===c?"active":""}" onclick="setFilter(${JSON.stringify(c)})">${escapeHTML(c)}</button>`
+  ).join("");
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+function renderHabits() {
+  const list=habits.filter(h=>filter==="Alle"||h.category===filter);
+  const container=document.getElementById("habits");
+  if(!list.length) {
+    container.innerHTML='<div class="panel empty">Noch keine Gewohnheiten in dieser Kategorie.<br>Füge deine erste hinzu!</div>';
+    return;
+  }
+  container.innerHTML=list.map(h=>{
+    const done=!!h.history[today()];
+    const count=Object.values(h.history).filter(Boolean).length;
+    return `<div class="habit">
+      <div class="habit-color" style="background:${h.color}"></div>
+      <div class="habit-info">
+        <strong>${escapeHTML(h.name)}</strong>
+        <small>${escapeHTML(h.category)} · ${count} Mal erledigt · Ziel: ${h.target} Tage/Woche</small>
+      </div>
+      <div class="habit-actions">
+        <button class="small-btn" onclick="openModal(${Number(h.id)})" title="Bearbeiten">✎</button>
+        <button class="small-btn" onclick="deleteHabit(${Number(h.id)})" title="Löschen">×</button>
+        <button class="check ${done?"done":""}" onclick="toggleHabit(${Number(h.id)})">${done?"✓":"○"}</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderStats() {
+  const done=habits.filter(h=>h.history[today()]).length;
+  const total=habits.length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById("doneCount").textContent=done+" / "+total;
+  document.getElementById("progressText").textContent=pct+"%";
+  document.getElementById("progressBar").style.width=pct+"%";
+  document.getElementById("habitCount").textContent=total;
+  document.getElementById("totalDone").textContent=habits.reduce((s,h)=>s+Object.values(h.history).filter(Boolean).length,0);
+
+  let best=0;
+  const dates=[...new Set(habits.flatMap(h=>Object.keys(h.history)))];
+  dates.forEach(d=>{
+    const completed=habits.filter(h=>h.history[d]).length;
+    best=Math.max(best,habits.length?completed/habits.length*100:0);
+  });
+  document.getElementById("bestRate").textContent=Math.round(best)+"%";
+
+  const weekDates=Array.from({length:7},(_,i)=>{
+    const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7)+i);
+    return d.toISOString().slice(0,10);
+  });
+  const targets=habits.filter(h=>weekDates.filter(d=>h.history[d]).length>=h.target).length;
+  document.getElementById("weeklyDone").textContent=targets+" / "+total;
+}
+
+function renderCalendar() {
+  const names=["Mo","Di","Mi","Do","Fr","Sa","So"];
+  const monday=new Date();
+  monday.setDate(monday.getDate()-((monday.getDay()+6)%7));
+  const days=Array.from({length:7},(_,i)=>{
+    const d=new Date(monday);d.setDate(monday.getDate()+i);
+    return d;
+  });
+  document.getElementById("calendar").innerHTML=days.map((d,i)=>{
+    const key=d.toISOString().slice(0,10);
+    const done=habits.some(h=>h.history[key]);
+    return `<div class="day ${done?"done":""} ${key===today()?"today":""}">
+      <div class="day-name">${names[i]}</div>
+      <strong>${d.getDate()}</strong>
+      <div>${done?"✓":"·"}</div>
+    </div>`;
+  }).join("");
+}
+
+function render() {
+  dateLabel();
+  renderFilters();
+  renderHabits();
+  renderStats();
+  renderCalendar();
+}
+
+render();
+</script>
+
+<script>
+let deferredInstallPrompt = null;
+
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  document.getElementById("installBtn").style.display = "block";
+});
+
+async function installApp() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  const result = await deferredInstallPrompt.userChoice;
+  if (result.outcome === "accepted") {
+    document.getElementById("installBtn").style.display = "none";
+  }
+  deferredInstallPrompt = null;
+}
+
+window.addEventListener("appinstalled", () => {
+  document.getElementById("installBtn").style.display = "none";
+});
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .catch(error => console.error("Service Worker:", error));
+  });
+}
+</script>
+</body>
+</html>
